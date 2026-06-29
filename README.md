@@ -1,8 +1,8 @@
 # AIFun
 
-A couple of small generative-art toys written in **pure Python** — no `pip
-install`, no dependencies, just the standard library. Throwaway weekend code
-that turned out kind of pretty.
+A few small generative-art toys written in **mostly pure Python** — standard
+library only, apart from one optional GIF exporter. Throwaway weekend code that
+turned out kind of pretty.
 
 ---
 
@@ -60,6 +60,37 @@ python3 flowfield.py      # writes flowfield.svg, prints the seed
 
 ---
 
+## 🐦 `boids.py` — flocking simulation
+
+Craig Reynolds' classic **boids**: each bird steers by just three local rules —
+**separation** (don't crowd neighbours), **alignment** (match their heading),
+**cohesion** (drift toward their centre) — and a swarm emerges with no leader
+and no global plan. A minimum-speed rule keeps every bird cruising so the flock
+never collapses into a stationary clump.
+
+```bash
+python3 boids.py          # -> boids.svg : one still, trails = the swarm's path
+python3 boids.py --gif    # -> boids.gif : animation (needs Pillow)
+```
+
+![boids](boids.gif)
+
+**How it works**
+
+- Each `Boid` scans neighbours within a perception radius and accumulates the
+  three steering vectors, each capped by `MAX_FORCE` so turns stay smooth.
+- Separation is weighted highest and a `MIN_SPEED` floor stops the flock from
+  stalling — the two fixes that turn a dead clump into a living swarm.
+- The **SVG** mode traces each bird's full path into vector ink. The **GIF**
+  mode draws fading per-bird tails frame by frame with Pillow.
+- Soft walls near the canvas edge nudge birds back inward instead of hard
+  bouncing, so the flock wanders the whole frame.
+
+**Tweakables** (top of the file): `N_BOIDS`, `PERCEPTION`, `SEPARATION`,
+`MAX_SPEED`/`MIN_SPEED`, `MAX_FORCE`, `TRAIL`.
+
+---
+
 ## 🖼 gallery
 
 Five sample renders from `flowfield.py`, each as both PNG (preview) and SVG
@@ -75,4 +106,6 @@ different seed.
 
 ## requirements
 
-Python 3.6+. That's it.
+Python 3.6+ and nothing else — except `boids.py --gif`, which needs
+[Pillow](https://pypi.org/project/Pillow/) (`pip install pillow`). Everything
+else, including `boids.py`'s SVG mode, is pure standard library.
