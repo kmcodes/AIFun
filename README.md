@@ -91,6 +91,38 @@ python3 boids.py --gif    # -> boids.gif : animation (needs Pillow)
 
 ---
 
+## 🎡 `harmonograph.py` — pendulum drawing machine
+
+A digital **harmonograph** — the Victorian contraption where a pen tied to two
+or three swinging, slowly-dying pendulums draws hypnotic looping figures. The
+pen position is just a sum of **decaying sine waves**; because the pendulums
+are detuned a hair off whole-number ratios, the figure precesses instead of
+closing, and the damping makes it spiral gently inward as the swing dies.
+
+```bash
+python3 harmonograph.py            # -> harmonograph.svg : one still (no deps)
+python3 harmonograph.py --gif      # -> harmonograph.gif : pen draws live (Pillow)
+python3 harmonograph.py --seed 7   # reproduce a specific figure
+```
+
+![harmonograph](harmonograph.gif)
+
+**How it works**
+
+- Each `Pendulum` is `amp * sin(2π·freq·t + phase) · e^(−damp·t)` — a sine that
+  fades. The pen sums two pendulums per axis; X and Y ride **different** low
+  ratios so the figure opens into a full 2-D loop instead of collapsing onto a
+  line (the failure mode when both axes share a ratio and drift into phase).
+- The hue drifts along the curve as it's drawn, so the ink shifts colour like
+  it's slowly drying — same trick in both SVG and GIF renderers.
+- Every run randomises frequencies, phases, damping and palette, and prints the
+  `seed` so a figure you like can be reproduced.
+
+**Tweakables** (top of the file): `DURATION`, `DT` (curve smoothness / file
+size), `BASE_FREQ`, `DETUNE`, `LINE_W`.
+
+---
+
 ## 🖼 gallery
 
 Five sample renders from `flowfield.py`, each as both PNG (preview) and SVG
@@ -106,6 +138,7 @@ different seed.
 
 ## requirements
 
-Python 3.6+ and nothing else — except `boids.py --gif`, which needs
-[Pillow](https://pypi.org/project/Pillow/) (`pip install pillow`). Everything
-else, including `boids.py`'s SVG mode, is pure standard library.
+Python 3.6+ and nothing else — except the `--gif` modes of `boids.py` and
+`harmonograph.py`, which need [Pillow](https://pypi.org/project/Pillow/)
+(`pip install pillow`). Everything else, including every SVG mode, is pure
+standard library.
