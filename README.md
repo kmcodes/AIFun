@@ -123,6 +123,33 @@ size), `BASE_FREQ`, `DETUNE`, `LINE_W`.
 
 ---
 
+## 🛰 `iss.py` — where is the ISS right now?
+
+Not generative art — a live-data toy. Fetches the **International Space
+Station's** current position from the open-notify.org API and plots it as a
+bright `@` on an ASCII world map in your terminal, then lists every human
+currently off the planet (ISS + China's Tiangong).
+
+```bash
+python3 iss.py            # one snapshot
+python3 iss.py --track    # live: re-fetches every 5s, Ctrl-C to quit
+```
+
+Needs internet, but **no API key and no third-party libraries** — just
+`urllib` from the standard library.
+
+**How it works**
+
+- Two GETs: `iss-now.json` (lat/lon) and `astros.json` (crew list).
+- The map is a hand-drawn **equirectangular** grid; lat/lon project straight
+  to (row, col). The continent layout was checked against real coordinates —
+  London, Tokyo, Sydney, Rio and NYC all land on the right landmass — so the
+  `@` sits where the station actually is, ocean and all.
+- `--track` loops with a home-and-clear so the station drifts across the map
+  in real time (~27 600 km/h, so it visibly moves every few seconds).
+
+---
+
 ## 🖼 gallery
 
 Five sample renders from `flowfield.py`, each as both PNG (preview) and SVG
