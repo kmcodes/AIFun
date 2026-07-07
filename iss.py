@@ -86,9 +86,14 @@ def snapshot():
     for p in crew:
         crafts.setdefault(p["craft"], []).append(p["name"])
     total = len(crew)
-    print(f"  \033[1m{total} humans off Earth right now:\033[0m")
+    print(f"  \033[1mcrew, per the astros.json feed ({total} names):\033[0m")
     for craft, names in crafts.items():
         print(f"    {craft}: {', '.join(names)}")
+    # The position feed is live, but open-notify's crew list is known to be
+    # stale (it has served the same snapshot for a long time), so don't dress
+    # it up as "who is in space right now".
+    print("    \033[2m(note: this crew feed is often out of date — the "
+          "@ position above is live)\033[0m")
 
 
 def main():

@@ -127,8 +127,10 @@ size), `BASE_FREQ`, `DETUNE`, `LINE_W`.
 
 Not generative art — a live-data toy. Fetches the **International Space
 Station's** current position from the open-notify.org API and plots it as a
-bright `@` on an ASCII world map in your terminal, then lists every human
-currently off the planet (ISS + China's Tiangong).
+bright `@` on an ASCII world map in your terminal. It also prints the crew
+list the API returns — but that particular feed is **known to be stale**
+(it has served the same old snapshot for a long time), so the script labels
+it as such. The `@` position, however, is genuinely live.
 
 ```bash
 python3 iss.py            # one snapshot
