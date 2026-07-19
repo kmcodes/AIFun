@@ -197,6 +197,25 @@ checked into the repo, you always make a fresh one.
 
 ---
 
+## 🟩 `wordleish.html` — a Wordle you own
+
+A complete Wordle clone in **one static HTML file** — no server, no build,
+no network at all. Double-click it and play. The full dictionary (2,315
+answers + ~12,500 extra valid guesses, the original Wordle lists) is
+embedded right in the file, so it works on a plane.
+
+- **Daily puzzle** — the word is picked deterministically from the date
+  (UTC), so everyone opening the file on the same day gets the same word.
+- **Practice mode** — unlimited random games that don't touch your stats.
+- Streaks, win %, and guess distribution saved in `localStorage`.
+- Share button copies the classic 🟩🟨⬜ emoji grid.
+- Tile flip / shake / win-dance animations (disabled under
+  `prefers-reduced-motion`), light + dark theme.
+- Correct duplicate-letter scoring (the classic two-pass algorithm —
+  guessing SPEED against ABIDE marks exactly one E).
+
+---
+
 ## 🖼 gallery
 
 Five sample renders from `flowfield.py`, each as both PNG (preview) and SVG
