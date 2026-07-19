@@ -152,6 +152,51 @@ Needs internet, but **no API key and no third-party libraries** — just
 
 ---
 
+## 🌍 `quakesong.py` — listen to the Earth
+
+Another live-data toy, but this one makes **music**. It pulls the last 24
+hours of earthquakes from the USGS real-time feed and sonifies them into a
+~80-second stereo WAV, plus an SVG poster showing where every note came from.
+
+The mapping: time of quake → position in the piece, **magnitude → loudness**
+and how long the bell rings, **depth → pitch** (shallow quakes chime high,
+600 km deep-focus quakes toll low), longitude → stereo pan. Pitches snap to
+an A-minor pentatonic scale, so whatever the planet did today comes out
+vaguely musical. Every day is a different piece.
+
+```bash
+python3 quakesong.py                 # fetch + write quakesong.wav / .svg
+python3 quakesong.py --min-mag 4.5   # only the big ones
+python3 quakesong.py --seconds 120   # stretch the day over 2 minutes
+```
+
+**How it works**
+
+- One GET to the USGS `all_day.geojson` feed (no key needed).
+- Each quake is a struck bell: three inharmonic partials (1×, 2.76×, 5.4×)
+  with exponential decay — rendered with a rotating **complex phasor**
+  (`z *= step`) instead of calling `math.sin` per sample, which keeps pure
+  Python fast enough to mix hundreds of bells in seconds.
+- Quakes ≥ M5.5 get a sub-octave toll underneath.
+- Depth → pitch uses a log scale (most quakes are ~10 km, a few are 600 km),
+  then snaps to a 4-octave pentatonic table.
+- The WAV is written with the stdlib `wave` module; the poster
+  (`quakesong.svg`) plots every quake on a graticule — ring size is
+  magnitude, colour is depth (amber = shallow → violet = deep) — with a
+  timeline of the piece underneath.
+
+There's also **`quakesong.html`** — a self-contained interactive player.
+Open it straight from disk in any browser (no server needed): it fetches
+the **live USGS feed** on load (the feed is CORS-open, so this works even
+from `file://`), falls back to an embedded snapshot when offline, and
+plays today's quakes with the same bell synth rebuilt in WebAudio.
+Ripples burst on a world map in sync with the sound, the score strip is
+click-to-seek, and the **↓ WAV button** renders the whole piece offline
+(`OfflineAudioContext`) and downloads it — so the generated WAV isn't
+checked into the repo, you always make a fresh one.
+
+---
+
 ## 🖼 gallery
 
 Five sample renders from `flowfield.py`, each as both PNG (preview) and SVG

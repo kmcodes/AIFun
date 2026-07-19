@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quakesong</title>
+<style>
+  :root{
+    --ink:#0b0e1a; --panel:#141a33; --grid:#1d2340; --line:#2a3155;
+    --text:#e8ecff; --muted:#5b648c; --amber:#ffc454; --coral:#ff7a59;
+    --violet:#8f7ae0;
+    --mono:ui-monospace,"JetBrains Mono","Cascadia Code",Menlo,Consolas,monospace;
+  }
+  html{color-scheme:dark}
+  body{background:var(--ink);color:var(--text);font-family:var(--mono);
+       margin:0;padding:28px 20px 48px;display:flex;justify-content:center}
+  .rig{width:min(1060px,100%);display:flex;flex-direction:column;gap:18px}
+
+  header{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 18px}
+  h1{font-size:clamp(22px,3.4vw,30px);margin:0;letter-spacing:.28em;font-weight:700}
+  h1 .dot{color:var(--amber)}
+  .date{color:var(--muted);font-size:14px;letter-spacing:.12em}
+  .sub{width:100%;color:var(--muted);font-size:13.5px;line-height:1.6;max-width:68ch;margin:2px 0 0}
+  .sub b{color:var(--text);font-weight:600}
+
+  .stage{position:relative;border:1px solid var(--line);border-radius:6px;
+         background:var(--panel);overflow:hidden}
+  canvas{display:block;width:100%}
+  #map{aspect-ratio:2.15/1}
+  .nowplaying{position:absolute;left:14px;bottom:12px;font-size:13px;color:var(--muted);
+              background:rgba(11,14,26,.72);padding:4px 10px;border-radius:4px;
+              max-width:calc(100% - 28px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .nowplaying b{color:var(--amber);font-weight:600}
+
+  .transport{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  #play{font:600 14px/1 var(--mono);letter-spacing:.18em;color:var(--ink);
+        background:var(--amber);border:0;border-radius:4px;padding:13px 26px;cursor:pointer}
+  #play:hover{background:#ffd377}
+  #play:focus-visible,#wav:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+  #wav{font:600 13px/1 var(--mono);letter-spacing:.14em;color:var(--amber);
+       background:none;border:1px solid var(--line);border-radius:4px;
+       padding:12px 18px;cursor:pointer}
+  #wav:hover{border-color:var(--amber)}
+  #wav:disabled{color:var(--muted);cursor:wait}
+  .clock{font-size:15px;color:var(--text);font-variant-numeric:tabular-nums;letter-spacing:.08em}
+  .clock span{color:var(--muted)}
+  .hint{color:var(--muted);font-size:12.5px;letter-spacing:.06em}
+
+  .score{border:1px solid var(--line);border-radius:6px;background:var(--panel)}
+  #timeline{height:86px;cursor:pointer}
+
+  .legend{display:flex;gap:28px 40px;flex-wrap:wrap;color:var(--muted);
+          font-size:12.5px;line-height:1.5;align-items:flex-start}
+  .legend .k{letter-spacing:.16em;color:var(--text);font-size:11px;
+             text-transform:uppercase;display:block;margin-bottom:7px}
+  .depthbar{width:200px;height:10px;border-radius:5px;
+            background:linear-gradient(90deg,#ffc454,#ff7a59,#c45d98,#6e54c8)}
+  .depthlabels{display:flex;justify-content:space-between;width:200px;margin-top:4px}
+  .mags{display:flex;align-items:center;gap:10px}
+  .mags i{border-radius:50%;background:none;border:1.5px solid var(--muted);display:inline-block}
+  .notes{max-width:46ch}
+</style>
+
+<div class="rig">
+  <header>
+    <h1>QUAKESONG<span class="dot">.</span></h1>
+    <span class="date" id="src">loading&hellip;</span>
+    <p class="sub">The last 24 hours of earthquakes on Earth, played as music.
+      <b id="stat-count">&hellip;</b> squeezed into 72 seconds &mdash; time is position,
+      <b>magnitude is loudness</b>, <b>depth is pitch</b> (shallow chimes, deep tolls),
+      longitude is stereo pan. Loudest of the day: <b id="stat-big">&hellip;</b>.</p>
+  </header>
+
+  <div class="stage">
+    <canvas id="map"></canvas>
+    <div class="nowplaying" id="now">press play &mdash; headphones recommended for the pan</div>
+  </div>
+
+  <div class="transport">
+    <button id="play">&#9654; PLAY THE PLANET</button>
+    <button id="wav">&#8595; WAV</button>
+    <div class="clock"><span id="cur">0:00</span> <span>/ 1:20</span></div>
+    <div class="hint">click the score below to seek</div>
+  </div>
+
+  <div class="stage score"><canvas id="timeline"></canvas></div>
+
+  <div class="legend">
+    <div><span class="k">Depth &rarr; pitch</span>
+      <div class="depthbar"></div>
+      <div class="depthlabels"><span>0 km &middot; high</span><span>700 km &middot; low</span></div>
+    </div>
+    <div><span class="k">Magnitude &rarr; size &amp; loudness</span>
+      <div class="mags">
+        <i style="width:6px;height:6px"></i>M2.5
+        <i style="width:12px;height:12px"></i>M4
+        <i style="width:22px;height:22px"></i>M6+
+      </div>
+    </div>
+    <div class="notes"><span class="k">Instrument</span>
+      Each quake strikes a bell: three inharmonic partials with exponential
+      decay, tuned to A-minor pentatonic. Deep-focus quakes ring the low end.
+      Same synth as <code>quakesong.py</code>; &#8595; WAV renders the piece
+      offline and downloads it.
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+// Frozen fallback for when the live USGS fetch is blocked or offline.
+const SNAPSHOT_DAY="2026-07-19";
+const SNAPSHOT=[[4.4,-94.94,16.88,116.3,1784380475,"10 km E of El Bajío, Mexico"],[2.83,-65.53,19.0,7.0,1784381271,"70 km NNE of Vieques, Puerto Rico"],[4.3,-93.43,14.02,10,1784381317,"134 km SW of Puerto Madero, Mexico"],[2.91,-67.46,18.48,18.5,1784389676,"27 km NW of Rincón, Puerto Rico"],[5.1,-81.54,17.94,10,1784390924,"149 km S of George Town, Cayman Islands"],[4.3,-92.92,14.23,10,1784393757,"76 km SW of Puerto Madero, Mexico"],[4.8,-26.24,-59.44,122.0,1784393854,"South Sandwich Islands region"],[5.7,-92.88,14.24,10,1784395585,"72 km SW of Puerto Madero, Mexico"],[5.5,-50.97,-60.7,10,1784404236,"Scotia Sea"],[4.4,-92.73,14.42,35,1784410529,"47 km SW of Puerto Madero, Mexico"],[3.04,-64.67,18.87,24.0,1784411604,"60 km NNE of Cruz Bay, U.S. Virgin Islands"],[4,132.51,43.49,502.7,1784411697,"4 km NE of Mnogoudobnoye, Russia"],[4.6,-93.42,14.27,10,1784414964,"118 km WSW of Puerto Madero, Mexico"],[4.7,-87.11,11.36,25.8,1784417480,"80 km SW of Masachapa, Nicaragua"],[4.5,-92.54,14.35,35,1784417881,"39 km WSW of Brisas Barra de Suchiate, Mexico"],[2.5,-121.47,37.11,22.6,1784418626,"12 km ENE of San Martin, CA"],[2.93,-65.08,19.02,20.4,1784420867,"76 km NNW of Charlotte Amalie, U.S. Virgin Islands"],[4.4,-92.99,14.58,35,1784421230,"63 km WSW of Puerto Madero, Mexico"],[2.82,-116.55,31.89,11.3,1784421444,"7 km ENE of Ensenada, B.C., MX"],[5.3,159.61,51.39,10,1784421579,"190 km SSE of Vilyuchinsk, Russia"],[4.1,133.42,38.62,459.8,1784425205,"281 km N of Ama, Japan"],[5.3,-92.92,14.12,10,1784425644,"85 km SW of Puerto Madero, Mexico"],[4.8,128.55,2.75,223.0,1784426276,"127 km NNE of Tobelo, Indonesia"],[4.6,-92.77,14.36,35,1784426493,"55 km SW of Puerto Madero, Mexico"],[5.3,-92.76,14.29,19.6,1784427534,"59 km SW of Puerto Madero, Mexico"],[5.5,-75.3,-12.04,10,1784427876,"2 km WSW of Sicaya, Peru"],[4.9,48.84,32.55,10,1784427920,"40 km ENE of Shahrak-e Kūlūrī, Iran"],[4.2,-92.87,14.51,35,1784431640,"53 km WSW of Puerto Madero, Mexico"],[2.8,-154.63,58.31,5,1784433934,"83 km N of Karluk, Alaska"],[4.4,-92.88,14.02,35,1784434526,"91 km SW of Brisas Barra de Suchiate, Mexico"],[3.07,-64.36,18.74,38.1,1784434950,"64 km NE of Cruz Bay, U.S. Virgin Islands"],[4.2,-92.75,14.28,30.7,1784435727,"60 km SW of Puerto Madero, Mexico"],[4.4,-93.0,13.96,35,1784435935,"105 km SW of Puerto Madero, Mexico"],[2.8,-126.51,42.36,10,1784436036,"171 km WSW of Port Orford, Oregon"],[3.2,-65.73,18.82,27.0,1784436374,"44 km NNE of Vieques, Puerto Rico"],[4.6,152.55,47.57,112.9,1784437105,"Kuril Islands"],[2.9,-64.85,18.12,9.8,1784437121,"24 km SSW of Cruz Bay, U.S. Virgin Islands"],[3.11,-122.8,38.81,2.2,1784437890,"6 km NW of The Geysers, CA"],[3.78,-68.41,18.27,131,1784443978,"24 km ESE of Boca de Yuma, Dominican Republic"],[4.8,106.45,-7.74,10,1784448662,"83 km S of Pelabuhanratu, Indonesia"],[4.6,-173.04,-16.35,10,1784454483,"91 km ESE of Hihifo, Tonga"],[3.2,-154.63,58.31,5,1784457040,"82 km N of Karluk, Alaska"],[4.5,82.6,28.46,10,1784457930,"46 km NE of Tulsīpur, Nepal"],[2.9,-101.08,32.34,7.4,1784462297,"6 km WSW of Westbrook, Texas"]];
+const FEED="https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
+const MIN_MAG=2.5, PIECE=72, TAIL=8, TOTAL=PIECE+TAIL, RATE=44100;
+
+let quakes=[], T0=0, SPAN=1, maxMag=6, dataDay="";
+const qtime=q=>(q[4]-T0)/SPAN*PIECE;             // seconds into the piece
+
+// same crude equirectangular ASCII world as iss.py, drawn faint behind the data
+const WORLD=[
+". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+". . . . . _.--._ . . . . . . _.-._ . . . . . _.--..__.-. . . . . . .",
+". . . . _-  N.  '-. . . . . _' EUR '. . . . _'  A S I A  '-._ . . . .",
+". . . . |AMERICA  | . . . _-'-._..-' . . . |             | . . . . .",
+". . . . '-._    _.' . . . |  AFR   | . . . '._  .-._  _.-' . . . . .",
+". . . . . . '--'  . . . . |        | . . . . '-'    '-' . . . . . . .",
+". . . . . . . |  . . . . .'._    _.' . . . . . . . . . . . . . . . .",
+". . . . . . _-'-._ . . . . . '--' . . . . . . . . . _.-. . . . . . .",
+". . . . . .| SOUTH| . . . . . . . . . . . . . . . .( AUS ) . . . . .",
+". . . . . .|AMERICA. . . . . . . . . . . . . . . . '-._.-' . . . . .",
+". . . . . . '-._.' . . . . . . . . . . . . . . . . . . . . . . . . .",
+". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."];
+
+const PENT=[];                                   // A-minor pentatonic, 4 octaves low->high
+for(let oct=0;oct<4;oct++) for(const s of [0,3,5,7,10]) PENT.push(55*2**(oct+s/12));
+const depthX=d=>Math.log1p(Math.max(0,d))/Math.log1p(700);
+const depthFreq=d=>PENT[Math.round((1-depthX(d))*(PENT.length-1))];
+function depthColor(d){
+  const stops=[[255,196,84],[255,122,89],[196,93,152],[110,84,200]];
+  let x=depthX(d)*(stops.length-1), i=Math.min(stops.length-2,Math.floor(x)), f=x-i;
+  const c=stops[i].map((a,k)=>Math.round(a+(stops[i+1][k]-a)*f));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+}
+const magR=m=>2.5+(m/7)**2*26;
+
+// ---------------------------------------------------------------- audio
+let ctx=null, master=null, playing=false, startAt=0, offset=0;
+const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function bell(acx,dest,when,q){
+  const [mag,lon,,dep]=q, f0=depthFreq(dep);
+  const amp=Math.pow(2,mag)/Math.pow(2,maxMag)*0.5;
+  const ring=0.6+(mag/6.5)**2*7;
+  const pan=new StereoPannerNode(acx,{pan:lon/180*0.9});
+  pan.connect(dest);
+  const partials=[[1,1],[2.76,.4],[5.4,.15]];
+  if(mag>=5.5) partials.push([0.5,.7]);
+  for(const [ratio,gain] of partials){
+    if(f0*ratio>acx.sampleRate/2) continue;
+    const o=new OscillatorNode(acx,{frequency:f0*ratio});
+    const g=new GainNode(acx,{gain:0});
+    g.gain.setValueAtTime(0,when);
+    g.gain.linearRampToValueAtTime(amp*gain,when+0.006);
+    g.gain.exponentialRampToValueAtTime(1e-4,when+ring*(ratio<1?1.3:1));
+    o.connect(g).connect(pan);
+    o.start(when); o.stop(when+ring*1.4);
+  }
+}
+function buildGraph(acx){
+  const gain=new GainNode(acx,{gain:0.9});
+  const comp=new DynamicsCompressorNode(acx,{threshold:-14,ratio:4});
+  gain.connect(comp).connect(acx.destination);
+  return gain;
+}
+function schedule(from){
+  master=buildGraph(ctx);
+  const now=ctx.currentTime+0.06;
+  for(const q of quakes){
+    const t=qtime(q);
+    if(t>=from-0.01) bell(ctx,master,now+(t-from),q);
+  }
+  startAt=now-from;
+}
+function stopAudio(){ if(master){master.disconnect();master=null;} }
+const pos=()=>playing?Math.min(ctx.currentTime-startAt,TOTAL):offset;
+
+function setPlaying(p){
+  playing=p;
+  document.getElementById("play").innerHTML=p?"&#10074;&#10074; PAUSE":"&#9654; PLAY THE PLANET";
+}
+document.getElementById("play").addEventListener("click",async()=>{
+  if(!quakes.length) return;
+  if(!ctx){ctx=new AudioContext();}
+  await ctx.resume();
+  if(playing){offset=pos();stopAudio();setPlaying(false);return;}
+  if(offset>=TOTAL){offset=0;settled=new Set();ripples=[];}
+  schedule(offset); setPlaying(true);
+});
+function seek(t){
+  offset=Math.max(0,Math.min(TOTAL,t));
+  settled=new Set(); ripples=[];
+  for(const q of quakes) if(qtime(q)<offset-0.01) mark(q,true);
+  if(playing){stopAudio();schedule(offset);}
+}
+
+// ------------------------------------------------------------ WAV export
+function encodeWav(buf){
+  const n=buf.length, data=new DataView(new ArrayBuffer(44+n*4));
+  const str=(o,s)=>{for(let i=0;i<s.length;i++)data.setUint8(o+i,s.charCodeAt(i));};
+  str(0,"RIFF"); data.setUint32(4,36+n*4,true); str(8,"WAVE");
+  str(12,"fmt "); data.setUint32(16,16,true); data.setUint16(20,1,true);
+  data.setUint16(22,2,true); data.setUint32(24,RATE,true);
+  data.setUint32(28,RATE*4,true); data.setUint16(32,4,true); data.setUint16(34,16,true);
+  str(36,"data"); data.setUint32(40,n*4,true);
+  const L=buf.getChannelData(0), R=buf.getChannelData(1);
+  for(let i=0;i<n;i++){
+    data.setInt16(44+i*4,  Math.max(-1,Math.min(1,L[i]))*32767,true);
+    data.setInt16(44+i*4+2,Math.max(-1,Math.min(1,R[i]))*32767,true);
+  }
+  return new Blob([data],{type:"audio/wav"});
+}
+document.getElementById("wav").addEventListener("click",async e=>{
+  if(!quakes.length) return;
+  const btn=e.currentTarget;
+  btn.disabled=true; btn.textContent="rendering…";
+  try{
+    const off=new OfflineAudioContext(2,TOTAL*RATE,RATE);
+    const dest=buildGraph(off);
+    for(const q of quakes) bell(off,dest,qtime(q)+0.05,q);
+    const buf=await off.startRendering();
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(encodeWav(buf));
+    a.download=`quakesong-${dataDay}.wav`;
+    a.click(); URL.revokeObjectURL(a.href);
+  }finally{
+    btn.disabled=false; btn.innerHTML="&#8595; WAV";
+  }
+});
+
+// ---------------------------------------------------------------- canvases
+const map=document.getElementById("map"), tl=document.getElementById("timeline");
+const mctx=map.getContext("2d"), tctx=tl.getContext("2d");
+let ripples=[], settled=new Set();
+
+function fit(c){
+  const dpr=devicePixelRatio||1, r=c.getBoundingClientRect();
+  c.width=r.width*dpr; c.height=r.height*dpr;
+  c.getContext("2d").setTransform(dpr,0,0,dpr,0,0);
+}
+const proj=(lon,lat,w,h)=>[(lon+180)/360*w,(90-lat)/180*h];
+
+function mark(q,quiet){
+  settled.add(q);
+  if(!quiet) ripples.push({q,born:performance.now()});
+}
+
+function drawMap(){
+  const [w,h]=[map.clientWidth,map.clientHeight];
+  mctx.clearRect(0,0,w,h);
+  mctx.strokeStyle="#1d2340"; mctx.lineWidth=1;
+  for(let lon=-150;lon<180;lon+=30){const [x]=proj(lon,0,w,h);
+    mctx.beginPath();mctx.moveTo(x,0);mctx.lineTo(x,h);mctx.stroke();}
+  for(let lat=-60;lat<90;lat+=30){const [,y]=proj(0,lat,w,h);
+    mctx.beginPath();mctx.moveTo(0,y);mctx.lineTo(w,y);mctx.stroke();}
+  const cw=w/WORLD[0].length, ch=h/WORLD.length;
+  mctx.font=`${Math.floor(ch*0.9)}px ui-monospace,Menlo,monospace`;
+  mctx.textBaseline="top"; mctx.fillStyle="rgba(91,100,140,0.33)";
+  WORLD.forEach((row,r)=>{for(let c=0;c<row.length;c++){
+    const g=row[c]; if(g!==" "&&g!==".") mctx.fillText(g,c*cw,r*ch);}});
+  for(const q of settled){
+    const [x,y]=proj(q[1],q[2],w,h);
+    mctx.globalAlpha=0.85; mctx.fillStyle=depthColor(q[3]);
+    mctx.beginPath();mctx.arc(x,y,magR(q[0])*0.45+1.5,0,7);mctx.fill();
+    mctx.globalAlpha=1;
+  }
+  const now=performance.now(), life=reduced?600:2600;
+  ripples=ripples.filter(r=>now-r.born<life);
+  for(const r of ripples){
+    const q=r.q, k=(now-r.born)/life, [x,y]=proj(q[1],q[2],w,h);
+    const R=magR(q[0]);
+    mctx.strokeStyle=depthColor(q[3]);
+    mctx.globalAlpha=(1-k)*0.9; mctx.lineWidth=2;
+    mctx.beginPath();mctx.arc(x,y,R*(0.5+k*2.2),0,7);mctx.stroke();
+    mctx.globalAlpha=(1-k)*0.5;
+    mctx.beginPath();mctx.arc(x,y,R*(0.2+k*4),0,7);mctx.stroke();
+    mctx.globalAlpha=Math.min(1,(1-k)*1.6); mctx.fillStyle=depthColor(q[3]);
+    mctx.beginPath();mctx.arc(x,y,R*0.55,0,7);mctx.fill();
+    mctx.globalAlpha=1;
+  }
+}
+
+function drawTimeline(){
+  const [w,h]=[tl.clientWidth,tl.clientHeight], pad=10, t=pos();
+  tctx.clearRect(0,0,w,h);
+  tctx.strokeStyle="#2a3155";
+  tctx.beginPath();tctx.moveTo(pad,h-16);tctx.lineTo(w-pad,h-16);tctx.stroke();
+  for(const q of quakes){
+    const x=pad+qtime(q)/TOTAL*(w-2*pad), bar=5+(q[0]/7)**2*(h-30);
+    tctx.globalAlpha=qtime(q)<=t?1:0.35;
+    tctx.strokeStyle=depthColor(q[3]); tctx.lineWidth=2.4;
+    tctx.beginPath();tctx.moveTo(x,h-16);tctx.lineTo(x,h-16-bar);tctx.stroke();
+  }
+  tctx.globalAlpha=1;
+  const px=pad+Math.min(t,TOTAL)/TOTAL*(w-2*pad);
+  tctx.strokeStyle="#e8ecff"; tctx.lineWidth=1.5;
+  tctx.beginPath();tctx.moveTo(px,6);tctx.lineTo(px,h-10);tctx.stroke();
+}
+
+tl.addEventListener("click",e=>{
+  const r=tl.getBoundingClientRect();
+  seek((e.clientX-r.left-10)/(r.width-20)*TOTAL);
+});
+
+const fmt=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,"0")}`;
+const nowEl=document.getElementById("now"), curEl=document.getElementById("cur");
+
+function tick(){
+  const t=pos();
+  if(playing){
+    for(const q of quakes){
+      if(qtime(q)<=t && !settled.has(q)){
+        mark(q,false);
+        nowEl.innerHTML=`<b>M${q[0].toFixed(1)}</b> &middot; ${q[5]} &middot; ${q[3]} km deep`;
+      }
+    }
+    if(t>=TOTAL){setPlaying(false);stopAudio();offset=TOTAL;
+      nowEl.innerHTML="fin &mdash; that was Earth's day. click the score to replay any part";}
+  }
+  curEl.textContent=fmt(Math.min(t,TOTAL));
+  drawMap(); drawTimeline();
+  requestAnimationFrame(tick);
+}
+
+// ---------------------------------------------------------------- data
+function setData(list,day,srcLabel){
+  if(playing){stopAudio();setPlaying(false);}
+  quakes=list; dataDay=day; offset=0; settled=new Set(); ripples=[];
+  T0=quakes[0][4]; SPAN=Math.max(quakes[quakes.length-1][4]-T0,1);
+  maxMag=Math.max(...quakes.map(q=>q[0]));
+  const big=quakes.find(q=>q[0]===maxMag);
+  document.getElementById("src").textContent=srcLabel;
+  document.getElementById("stat-count").textContent=`${quakes.length} quakes`;
+  document.getElementById("stat-big").textContent=`M${maxMag.toFixed(1)} — ${big[5]}`;
+}
+
+async function loadLive(){
+  const ac=new AbortController(); setTimeout(()=>ac.abort(),9000);
+  const r=await fetch(FEED,{signal:ac.signal});
+  if(!r.ok) throw new Error(r.status);
+  const feed=await r.json();
+  const list=feed.features
+    .filter(f=>f.properties.mag!=null && f.properties.mag>=MIN_MAG)
+    .map(f=>{const c=f.geometry.coordinates, p=f.properties;
+      return [p.mag,c[0],c[1],Math.max(0,c[2]),Math.round(p.time/1000),p.place||"somewhere"];})
+    .sort((a,b)=>a[4]-b[4]);
+  if(list.length<2) throw new Error("feed too quiet");
+  const end=new Date(list[list.length-1][4]*1000);
+  const day=end.toISOString().slice(0,10);
+  const hm=end.toISOString().slice(11,16);
+  setData(list,day,`${day} · live USGS feed · latest quake ${hm} UTC`);
+}
+
+setData(SNAPSHOT,SNAPSHOT_DAY,`${SNAPSHOT_DAY} · snapshot`);
+loadLive().catch(()=>{
+  document.getElementById("src").textContent=
+    `${SNAPSHOT_DAY} · snapshot (live feed unreachable)`;
+});
+
+addEventListener("resize",()=>{fit(map);fit(tl);});
+fit(map); fit(tl); tick();
+</script>
+</html>
