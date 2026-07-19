@@ -216,6 +216,31 @@ embedded right in the file, so it works on a plane.
 
 ---
 
+## 🎵 `sargamle.html` — Wordle for the ears, in sargam
+
+Same idea as Wordle, but the hidden word is a **5-swara tune** and the
+letters are **Sa Re Ga Ma Pa Dha Ni**. Listen to the melody, tap it back
+on the pads, get green / amber / grey feedback per beat. Six tries.
+One static file, WebAudio synth, no server.
+
+Beginner-friendly on purpose:
+
+- **Raag Bhupali mode (default)** — only 5 swaras (Sa Re Ga Pa Dha), the
+  classic pentatonic, so there are no sour intervals to distinguish.
+  Switch to **Bilawal** for all seven.
+- A **tanpura drone** (Sa + low Pa, slightly detuned) hums underneath so
+  your ear always has the tonic to measure against. Toggleable.
+- Replay the hidden tune as many times as you want (space bar works too),
+  every pad press sounds its note before you commit, and each submitted
+  guess plays back while the tiles flip — so you hear *why* it was wrong.
+- Tuning is **just intonation** (9/8, 5/4, 3/2 …), the ratios Indian
+  classical music actually uses — sweeter than piano semitones.
+
+Daily tune seeded from the UTC date (same for everyone, per raag), plus
+unlimited practice tunes. Keys 1–7 play the pads, Enter submits.
+
+---
+
 ## 🖼 gallery
 
 Five sample renders from `flowfield.py`, each as both PNG (preview) and SVG
