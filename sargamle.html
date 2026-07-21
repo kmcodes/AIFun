@@ -5,7 +5,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kmcodes.github.io/AIFun/sargamle.html">
 <meta property="og:title" content="Sargamle - Wordle for the ears, in Sa Re Ga Ma">
-<meta property="og:description" content="Guess the hidden 5-swara tune in 6 tries. Raag Bhupali easy mode, tanpura drone, daily puzzle. Free, no signup, works offline.">
+<meta property="og:description" content="Guess the hidden 5-swara tune in 6 tries. Raag Bhupali-inspired mode, tanpura drone, daily puzzle. Free, no signup, works offline.">
 <meta property="og:image" content="https://kmcodes.github.io/AIFun/sargamle-card.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -149,8 +149,36 @@ const ALL={
   ni :{n:"Ni", d:"नी", r:15/8,  c:"var(--ni)"},
 };
 const RAGAS=[
-  {name:"Bhupali",  swaras:["sa","re","ga","pa","dha"]},          // pentatonic, easy
-  {name:"Bilawal",  swaras:["sa","re","ga","ma","pa","dha","ni"]},// full seven
+  {
+    name:"Bhupali",                                 // pentatonic, Bhupali-inspired grammar
+    label:"Bhupali-inspired",
+    swaras:["sa","re","ga","pa","dha"],
+    grammar:{
+      order:["sa","re","ga","pa","dha"],            // scale order (one octave)
+      // Characteristic contiguous phrases, kept as data so more can be added freely.
+      motifs:[
+        ["sa","re","ga"],
+        ["ga","re","sa"],
+        ["sa","re","ga","re","sa"],
+        ["ga","re","pa","ga"],
+        ["pa","re","ga"],
+        ["ga","pa","dha","pa"],
+        ["dha","pa","ga","re"],
+        ["dha","pa","ga","re","sa"],
+      ],
+      endBonus:{sa:6,ga:6,re:2,pa:2,dha:-4},        // resting-note preferences
+      discouraged:[["dha","re"]],                   // same-octave Dha -> Re
+      weights:{
+        motif:8, step:2, skip:1, jump3:-2, jump4:-3,
+        discouraged:-6, contourGood:3, contourFlip:-4
+      }
+    }
+  },
+  {
+    name:"Shuddha Saptak",                          // full seven notes
+    label:"Shuddha Saptak",
+    swaras:["sa","re","ga","ma","pa","dha","ni"]
+  },
 ];
 const SA=261.63, LEN=5, TRIES=6, STEP=0.42, NOTE=0.5;
 
@@ -162,6 +190,7 @@ const today=Math.floor((Date.now()-EPOCH)/86400000);
 const mulberry=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);
   t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
 
+// Plain random tune (no repeats back-to-back). Used by ragas without a grammar.
 function makeTune(seed,raga){
   const rnd=mulberry(seed), s=raga.swaras, out=[];
   let prev=-1;
@@ -171,6 +200,114 @@ function makeTune(seed,raga){
     out.push(s[k]); prev=k;
   }
   return out;
+}
+
+// ---------------------------------------------------------------- raga grammar
+// A candidate is just `length` swaras drawn uniformly from `notes` using rng.
+function generateCandidate(notes,length,rng){
+  const out=[];
+  for(let i=0;i<length;i++) out.push(notes[Math.floor(rng()*notes.length)]);
+  return out;
+}
+
+// Does `sequence` contain `motif` as a contiguous run?
+function containsMotif(sequence,motif){
+  outer:
+  for(let i=0;i+motif.length<=sequence.length;i++){
+    for(let j=0;j<motif.length;j++) if(sequence[i+j]!==motif[j]) continue outer;
+    return true;
+  }
+  return false;
+}
+
+// Signed step between two swaras along the raga's scale order (+ up, - down, 0 same).
+function stepDist(a,b,order){ return order.indexOf(b)-order.indexOf(a); }
+
+// Hard constraints. Returns true if the sequence is an acceptable Bhupali tune.
+// `requireGa` is relaxed by the generator only if nothing else survives.
+function isValidBhupaliSequence(seq,g,requireGa=true){
+  const notes=g.order;
+  // only allowed swaras
+  if(seq.some(s=>!notes.includes(s))) return false;
+  // count-based limits
+  const cnt={};
+  for(const s of seq) cnt[s]=(cnt[s]||0)+1;
+  if(Object.values(cnt).some(c=>c>=4)) return false;       // one swara 4 or 5 times
+  const distinct=Object.keys(cnt).length;
+  if(distinct<=2) return false;                            // only two distinct swaras
+  // no swara three times in a row
+  for(let i=0;i+2<seq.length;i++)
+    if(seq[i]===seq[i+1]&&seq[i+1]===seq[i+2]) return false;
+  // not every transition a large jump
+  let allBig=true;
+  for(let i=0;i+1<seq.length;i++)
+    if(Math.abs(stepDist(seq[i],seq[i+1],notes))<3){allBig=false;break;}
+  if(allBig) return false;
+  // must contain Ga (relaxable)
+  if(requireGa&&!seq.includes("ga")) return false;
+  return true;
+}
+
+// Score a candidate: higher is more Bhupali-like.
+function scoreBhupaliSequence(seq,g){
+  const w=g.weights, notes=g.order;
+  let score=0;
+
+  // characteristic fragments
+  for(const m of g.motifs) if(containsMotif(seq,m)) score+=w.motif;
+
+  // resting (final) note preference
+  score+=g.endBonus[seq[seq.length-1]]||0;
+
+  // transition scoring + collect contour directions
+  const dirs=[];
+  for(let i=0;i+1<seq.length;i++){
+    const d=stepDist(seq[i],seq[i+1],notes), a=Math.abs(d);
+    if(a===1) score+=w.step;
+    else if(a===2) score+=w.skip;
+    else if(a===3) score+=w.jump3;
+    else if(a>=4) score+=w.jump4;
+    // discouraged specific transitions (e.g. same-octave Dha -> Re)
+    if(g.discouraged.some(([x,y])=>x===seq[i]&&y===seq[i+1])) score+=w.discouraged;
+    dirs.push(Math.sign(d)); // +1 up, -1 down, 0 repeat
+  }
+
+  // contour: count direction changes among the non-repeat moves
+  const moves=dirs.filter(d=>d!==0);
+  let flips=0;
+  for(let i=1;i<moves.length;i++) if(moves[i]!==moves[i-1]) flips++;
+  if(flips<=2) score+=w.contourGood;    // reward calm contour (0-2 changes)
+  else score+=w.contourFlip;            // penalize zig-zag after nearly every note
+
+  return score;
+}
+
+// Generate many candidates, keep valid ones, score, and pick from the top slice.
+// Deterministic for a given rng, so daily puzzles stay stable.
+function generateRagaAwareTune(raga,length,rng){
+  if(!raga.grammar) return makeTune(0,raga); // shouldn't happen; guarded by caller
+  const g=raga.grammar, N=240;
+  const cand=[];
+  for(let i=0;i<N;i++) cand.push(generateCandidate(g.order,length,rng));
+
+  // First pass requires Ga; if that empties the pool, relax that one rule.
+  let valid=cand.filter(c=>isValidBhupaliSequence(c,g,true));
+  if(!valid.length) valid=cand.filter(c=>isValidBhupaliSequence(c,g,false));
+  if(!valid.length) return makeTune(Math.floor(rng()*2**31),raga); // last resort
+
+  const scored=valid
+    .map(seq=>({seq,score:scoreBhupaliSequence(seq,g)}))
+    .sort((a,b)=>b.score-a.score);
+
+  // Pick from roughly the top 10-20% (at least a few) using the same rng.
+  const topN=Math.max(1,Math.min(scored.length,Math.ceil(scored.length*0.15)));
+  return scored[Math.floor(rng()*topN)].seq;
+}
+
+// Route a raga through its grammar when it has one, else plain random.
+function tuneFor(seed,raga){
+  return raga.grammar ? generateRagaAwareTune(raga,LEN,mulberry(seed))
+                      : makeTune(seed,raga);
 }
 
 let ragaIdx=load("sg-raga",0), daily=true;
@@ -349,15 +486,14 @@ function newGame(isDaily){
   daily=isDaily; raga=RAGAS[ragaIdx];
   cur=[]; guesses=[]; done=false; clearGlow();
   document.getElementById("done").classList.remove("show");
-  document.getElementById("ragabtn").textContent=
-    raga.name+(ragaIdx===0?" · easy":" · full");
+  document.getElementById("ragabtn").textContent=raga.label||raga.name;
   document.getElementById("puzzno").textContent=daily?`#${today+1}`:"practice";
   if(daily){
-    target=makeTune(today*7+ragaIdx,raga);
+    target=tuneFor(today*7+ragaIdx,raga);
     const s=load("sg-day",null);
     if(s&&s.day===today&&s.raga===ragaIdx){guesses=s.guesses;done=s.done;}
   }else{
-    target=makeTune(Math.floor(Math.random()*2**31),raga);
+    target=tuneFor(Math.floor(Math.random()*2**31),raga);
   }
   buildPads(); paint();
   if(done){finishRestored();}
@@ -382,5 +518,62 @@ addEventListener("keydown",e=>{
 
 setDrone(true);
 newGame(true);
+
+// ---------------------------------------------------------------- dev diagnostics
+// Never runs during play. In the console: sargamleDiag()  /  sargamleTest()
+function sargamleDiag(n=10000){
+  const raga=RAGAS[0], g=raga.grammar;
+  let withMotif=0, dToR=0, rejected=0, dirTotal=0;
+  const endDist={}, freq={}, seen=new Set();
+  for(let i=0;i<n;i++){
+    // count rejections at the per-candidate level using one throwaway rng
+    const rng=mulberry((i+1)*2654435761>>>0);
+    let tries=0;
+    for(let k=0;k<240;k++){ if(!isValidBhupaliSequence(generateCandidate(g.order,LEN,rng),g,true)) tries++; }
+    rejected+=tries;
+    const t=tuneFor((i+1)*2654435761>>>0,raga);
+    if(g.motifs.some(m=>containsMotif(t,m))) withMotif++;
+    endDist[t[t.length-1]]=(endDist[t[t.length-1]]||0)+1;
+    for(const s of t) freq[s]=(freq[s]||0)+1;
+    for(let j=0;j+1<t.length;j++) if(t[j]==="dha"&&t[j+1]==="re"){dToR++;break;}
+    const dirs=[];
+    for(let j=0;j+1<t.length;j++) dirs.push(Math.sign(stepDist(t[j],t[j+1],g.order)));
+    const moves=dirs.filter(d=>d!==0); let flips=0;
+    for(let j=1;j<moves.length;j++) if(moves[j]!==moves[j-1]) flips++;
+    dirTotal+=flips;
+    seen.add(t.join("-"));
+  }
+  const r={
+    sampled:n,
+    pctWithMotif:+(100*withMotif/n).toFixed(1),
+    endingDistribution:endDist,
+    avgDirectionChanges:+(dirTotal/n).toFixed(2),
+    pctWithDhaToRe:+(100*dToR/n).toFixed(2),
+    rejectedCandidates:rejected,
+    swaraFrequency:freq,
+    uniqueTunes:seen.size,
+  };
+  console.table([r.endingDistribution]); console.log(r);
+  return r;
+}
+function sargamleTest(){
+  const raga=RAGAS[0], g=raga.grammar, allowed=g.order;
+  const ok=(c,m)=>{ if(!c) throw new Error("ASSERT FAIL: "+m); };
+  // same seed -> same tune
+  ok(tuneFor(12345,raga).join()===tuneFor(12345,raga).join(),"seed determinism");
+  ok(tuneFor(today*7,raga).join()===tuneFor(today*7,raga).join(),"daily determinism (no server)");
+  // scan many tunes for invariants
+  for(let i=0;i<2000;i++){
+    const t=tuneFor(i*7+3,raga);
+    ok(t.length===LEN,"length");
+    ok(t.every(s=>allowed.includes(s)),"only allowed swaras");
+    const cnt={}; t.forEach(s=>cnt[s]=(cnt[s]||0)+1);
+    ok(Math.max(...Object.values(cnt))<4,"no swara 4+ times");
+    for(let j=0;j+2<t.length;j++) ok(!(t[j]===t[j+1]&&t[j+1]===t[j+2]),"no triple repeat");
+  }
+  console.log("%csargamle: all assertions passed","color:#4f9d5d;font-weight:700");
+  return true;
+}
+if(typeof window!=="undefined"){ window.sargamleDiag=sargamleDiag; window.sargamleTest=sargamleTest; }
 </script>
 </html>
