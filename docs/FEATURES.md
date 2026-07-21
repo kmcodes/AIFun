@@ -144,8 +144,21 @@ Do not alter existing gameplay, random generation, daily seed, scoring, keyboard
 
 ## F2 — Privacy controls, consent banner, Privacy Notice & Terms
 
-**Status:** todo (record-only; not yet implemented)
-**Depends on:** F1. **Supersedes** F1's auto-load-on-every-page-load model.
+**Status:** DONE — implemented in `sargamle.html` (with F1 events, consent-gated). **Supersedes** F1's auto-load model.
+**Depends on:** F1 (implemented together).
+
+### Post-implementation notes
+
+- **F1 events were built together with F2**, all consent-gated: `game_start`, `melody_replay {replay_count}`, `guess_submit {attempt_number,is_correct}`, `game_complete {result,won,attempts_used,replay_count}`, `share {method,result,attempts_used}`, `practice_start {raga}`, `raga_change {previous_raga,selected_raga}`. Common params on every event: `game_name, raga (bhupali|shuddha_saptak), game_mode (daily|practice), puzzle_number`. `game_complete` fires from `submit()` (current-session completion) — never from `finish()`, so restoring a saved daily does not re-fire it.
+- **Verified** in node (consent state machine, dedupe, no-GA-before-consent, dev guard, expiry/version invalidation) and in a real browser (banner render, game playable behind banner, hash routing `#privacy`/`#terms`, Privacy-settings accept/disable, Clear-local-data touches only `sg-raga`/`sg-day`).
+- **Placeholders still to replace before public launch** (in the `PRIVACY_CONFIG` object at the top of `sargamle.html`): `gaMeasurementId`, `siteOperator`, `privacyEmail`, `effectiveDate`, `governingLaw`, `sourceCodeLicense`. Until replaced, GA does not actually track (invalid ID) and the email renders as plain text (no broken `mailto:`). A dev-only console warning lists unreplaced placeholders.
+- **Owner/legal review** of Privacy Notice + Terms wording still recommended before treating them as final.
+- **GA4 property config reminder:** set user/event retention to **14 months**; keep **Google Signals**, **ad personalization**, and **Google Ads linking** disabled (the code already sets `allow_google_signals:false` and `allow_ad_personalization_signals:false`).
+- Source-code footer link was **omitted** (per the reframed goal — F2 protects the deployed app, not the repo). `sourceCodeLicense` left as a placeholder.
+
+---
+
+**Original spec below (retained for reference).**
 
 ### Goal (read first)
 

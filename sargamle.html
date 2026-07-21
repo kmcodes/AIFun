@@ -14,6 +14,37 @@
 <meta name="twitter:description" content="Guess the hidden 5-swara tune in 6 tries. Tanpura drone included so your ear has a fighting chance.">
 <meta name="twitter:image" content="https://kmcodes.github.io/AIFun/sargamle-card.png">
 <title>Sargamle</title>
+
+<!-- ============================================================ PRIVACY / CONSENT
+     Google Consent Mode defaults MUST run before any possible tag load.
+     This block does NOT load gtag.js and sends no request; it only primes
+     the dataLayer and sets every storage category to 'denied' by default.
+     Actual analytics loading is opt-in and handled later in the main script. -->
+<script>
+"use strict";
+// ---- Replace the bracketed placeholders before public launch. See docs/FEATURES.md F2.
+window.PRIVACY_CONFIG = {
+  gaMeasurementId: 'G-XXXXXXXXXX',
+  siteOperator: '[YOUR NAME OR LEGAL ENTITY]',
+  privacyEmail: '[YOUR CONTACT EMAIL]',
+  effectiveDate: '[DD MONTH YYYY]',
+  governingLaw: '[STATE AND COUNTRY]',
+  sourceCodeLicense: '[LICENSE NAME OR ALL RIGHTS RESERVED]',
+  consentVersion: '1.0',
+  consentMaxAgeDays: 180
+};
+window.dataLayer = window.dataLayer || [];
+function gtag(){ window.dataLayer.push(arguments); }   // GA's canonical shim
+window.gtag = gtag;
+// Deny-by-default consent state. No script load, no network request here.
+gtag('consent', 'default', {
+  analytics_storage: 'denied',
+  ad_storage: 'denied',
+  ad_user_data: 'denied',
+  ad_personalization: 'denied',
+  wait_for_update: 500
+});
+</script>
 <style>
   :root{
     --bg:#141126; --panel:#1d1936; --line:#332c58; --text:#f2edfe;
@@ -100,6 +131,79 @@
                   border-radius:6px;padding:12px;cursor:pointer;
                   background:var(--accent);color:#241a05}
   .actions button.alt{background:var(--absent);color:var(--text)}
+
+  /* ---- privacy: footer ---- */
+  footer{width:min(560px,100%);border-top:1px solid var(--line);
+         padding:14px 16px 22px;margin-top:auto;color:var(--muted);
+         font-size:12px;line-height:1.7;text-align:center}
+  footer .flinks{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;margin-bottom:8px}
+  .flink{background:none;border:0;color:var(--muted);font:inherit;
+         text-decoration:underline;text-underline-offset:2px;cursor:pointer;padding:2px}
+  .flink:hover{color:var(--accent)}
+  footer a{color:var(--muted)}
+
+  /* ---- privacy: consent banner ---- */
+  #consent{position:fixed;left:0;right:0;bottom:0;z-index:20;
+           background:var(--panel);border-top:1px solid var(--line);
+           padding:14px 16px calc(14px + env(safe-area-inset-bottom));
+           display:none;box-shadow:0 -6px 20px rgba(0,0,0,.35)}
+  #consent.show{display:block}
+  #consent .wrap{width:min(620px,100%);margin:0 auto;display:flex;
+                 flex-direction:column;gap:12px}
+  #consent p{margin:0;font-size:13.5px;line-height:1.55;color:var(--text)}
+  #consent .cbtns{display:flex;flex-wrap:wrap;gap:8px}
+  #consent button{font:700 13px/1 system-ui;letter-spacing:.04em;border-radius:8px;
+                  padding:12px 18px;cursor:pointer;border:1px solid var(--line)}
+  #consent .accept{background:var(--accent);border-color:var(--accent);color:#241a05}
+  #consent .reject{background:var(--panel);color:var(--text)}
+  #consent .more{background:none;border:0;color:var(--muted);text-decoration:underline;
+                 text-underline-offset:2px;padding:12px 4px}
+  #consent .accept:hover{background:#f7b95e}
+  #consent .reject:hover{border-color:var(--accent)}
+
+  /* ---- privacy: dialogs (native <dialog>) ---- */
+  dialog.sg{border:1px solid var(--line);border-radius:12px;background:var(--panel);
+            color:var(--text);width:min(640px,94vw);max-height:86vh;padding:0;
+            box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  dialog.sg::backdrop{background:rgba(8,6,18,.66)}
+  .dlg-head{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);
+            display:flex;align-items:center;gap:10px;padding:12px 16px;z-index:1}
+  .dlg-head h2{margin:0;font-size:16px;letter-spacing:.06em;flex:1}
+  .dlg-close{background:var(--absent);color:var(--text);border:0;border-radius:6px;
+             font:700 15px/1 system-ui;padding:8px 12px;cursor:pointer}
+  .dlg-close:hover{background:var(--line)}
+  .dlg-body{padding:6px 18px 20px;overflow:auto;font-size:13.5px;line-height:1.62;color:var(--text)}
+  .dlg-body h3{font-size:14px;margin:18px 0 6px;color:var(--accent);letter-spacing:.02em}
+  .dlg-body h3:first-child{margin-top:8px}
+  .dlg-body p,.dlg-body li{color:var(--text);opacity:.92}
+  .dlg-body ul{margin:6px 0;padding-left:20px}
+  .dlg-body a{color:var(--accent)}
+  .dlg-body code{background:var(--bg);padding:1px 5px;border-radius:4px;font-size:12px}
+  .dlg-body .muted{color:var(--muted);opacity:1}
+  /* privacy-settings dialog radio choices + action buttons */
+  .pset{display:flex;flex-direction:column;gap:10px;margin:10px 0 4px}
+  .pset label{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;
+              border:1px solid var(--line);border-radius:8px;cursor:pointer}
+  .pset label:has(input:checked){border-color:var(--accent)}
+  .pset input{margin-top:2px}
+  .pset .lbl{font-weight:700}
+  .pset .sub{display:block;font-weight:400;color:var(--muted);font-size:12.5px;margin-top:2px}
+  .dlg-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .dlg-actions button{font:700 13px/1 system-ui;border-radius:8px;padding:11px 16px;
+                      cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--text)}
+  .dlg-actions .primary{background:var(--accent);border-color:var(--accent);color:#241a05}
+  .dlg-actions .danger{background:var(--absent);color:var(--text)}
+  .dlg-actions .primary:hover{background:#f7b95e}
+  .dlg-actions button:hover{border-color:var(--accent)}
+  .cstatus{font-size:13px;color:var(--muted);margin:2px 0 4px}
+  .cstatus b{color:var(--text)}
+  dialog.sg :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  @media (prefers-reduced-motion: no-preference){
+    dialog.sg[open]{animation:dlgin .18s ease}
+    @keyframes dlgin{from{opacity:0;transform:translateY(8px)}}
+    #consent.show{animation:cbin .2s ease}
+    @keyframes cbin{from{opacity:0;transform:translateY(12px)}}
+  }
 </style>
 
 <header>
@@ -134,7 +238,269 @@
     </div>
   </section>
 </main>
+
+<footer>
+  <div class="flinks">
+    <button class="flink" id="lnk-privacy">Privacy</button>
+    <button class="flink" id="lnk-terms">Terms</button>
+    <button class="flink" id="lnk-psettings">Privacy settings</button>
+  </div>
+  <div>Made as an independent ear-training experiment.</div>
+</footer>
+
 <div id="toast" role="status"></div>
+
+<!-- ============================================================ consent banner -->
+<div id="consent" role="dialog" aria-modal="false" aria-labelledby="consent-text">
+  <div class="wrap">
+    <p id="consent-text">Sargamle uses optional analytics to understand how many people
+      play and which game features are useful. Analytics is off unless you accept.
+      The game works either way.</p>
+    <div class="cbtns">
+      <button class="accept" id="c-accept">Accept analytics</button>
+      <button class="reject" id="c-reject">Reject analytics</button>
+      <button class="more" id="c-more">Privacy notice</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ privacy notice -->
+<dialog class="sg" id="dlg-privacy" aria-labelledby="dlg-privacy-title">
+  <div class="dlg-head">
+    <h2 id="dlg-privacy-title">Privacy Notice</h2>
+    <button class="dlg-close" data-close aria-label="Close">&times;</button>
+  </div>
+  <div class="dlg-body">
+    <p class="muted">Effective date: <span data-cfg="effectiveDate"></span>.
+      This is a plain-language notice, not a legal guarantee of compliance with any
+      particular law.</p>
+
+    <h3>Who operates Sargamle</h3>
+    <p>Sargamle is run by <b><span data-cfg="siteOperator"></span></b>. You can reach the
+      operator about privacy at <span data-cfg-email></span>.</p>
+
+    <h3>Information collected without optional analytics</h3>
+    <ul>
+      <li>No account is required.</li>
+      <li>The game never asks for your name, phone number, email address or payment information.</li>
+      <li>Functional game state and preferences may be stored locally in your browser (see below).</li>
+      <li>GitHub Pages delivers the website and may process ordinary technical request or
+        server-log information under its own policies.</li>
+    </ul>
+
+    <h3>Local data stored in your browser</h3>
+    <p>To make the game work, your browser may store essential local data such as:</p>
+    <ul>
+      <li>Daily puzzle progress</li>
+      <li>Your previous guesses and completion state</li>
+      <li>Selected raga</li>
+      <li>Audio or interface preferences</li>
+      <li>Practice-game state</li>
+      <li>Your analytics consent choice</li>
+    </ul>
+    <p>This local game data stays on your device unless another part of the site explicitly
+      sends it. Accepted analytics events are sent to Google Analytics, and GitHub Pages
+      serves the website &mdash; so it would be wrong to claim that no data ever leaves your device.
+      You can remove local game data any time from <b>Privacy settings &rarr; Clear local game data</b>.</p>
+
+    <h3>Optional Google Analytics</h3>
+    <p>Analytics is <b>disabled until you accept it</b>. If you accept, Google Analytics 4
+      may process categories of information such as:</p>
+    <ul>
+      <li>Page views</li>
+      <li>Game starts</li>
+      <li>Puzzle completions</li>
+      <li>Win or loss result</li>
+      <li>Attempts used</li>
+      <li>Replay counts</li>
+      <li>Share-button usage</li>
+      <li>Daily versus practice mode</li>
+      <li>Selected raga</li>
+      <li>Approximate geographic region</li>
+      <li>Browser, device and operating-system information</li>
+      <li>Session information</li>
+      <li>A pseudonymous browser identifier stored through Google Analytics cookies</li>
+    </ul>
+    <p>The game is built so that analytics <b>never</b> receives: the hidden melody, your
+      guesses, names, email addresses, phone numbers, precise location, user-entered
+      messages or custom user IDs.</p>
+
+    <h3>Analytics cookies</h3>
+    <ul>
+      <li><code>_ga</code> &mdash; used to distinguish pseudonymous visitors.</li>
+      <li><code>_ga_&lt;measurement-id&gt;</code> &mdash; used to maintain session state.</li>
+    </ul>
+    <p>Google's default cookie duration may be up to two years, but your browser settings and
+      actions can shorten or remove them. The cookie does not always last exactly two years.</p>
+
+    <h3>Why analytics is used</h3>
+    <ul>
+      <li>Measuring daily usage</li>
+      <li>Understanding whether visitors start and complete games</li>
+      <li>Finding usability problems</li>
+      <li>Understanding which modes and ragas are used</li>
+      <li>Improving the game</li>
+    </ul>
+    <p>Analytics here is not used for advertising, profiling, personalised advertising or sale of data.</p>
+
+    <h3>Choice and consent</h3>
+    <ul>
+      <li>Analytics is optional.</li>
+      <li>Rejecting it does not affect gameplay.</li>
+      <li>You can change your decision any time through <b>Privacy settings</b>.</li>
+      <li>Clearing your browser storage may cause the site to ask again.</li>
+    </ul>
+
+    <h3>Third-party services</h3>
+    <p>Sargamle relies on two third parties, each with its own independent privacy practices
+      that Sargamle does not control:</p>
+    <ul>
+      <li><b>Google Analytics</b> &mdash; usage analytics if you accept.
+        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google Privacy Policy</a>,
+        <a href="https://support.google.com/analytics/answer/6004245" target="_blank" rel="noopener noreferrer">Analytics data practices</a>.</li>
+      <li><b>GitHub Pages</b> &mdash; website hosting.
+        <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">GitHub Privacy Statement</a>.</li>
+    </ul>
+
+    <h3>Data retention</h3>
+    <ul>
+      <li>Local game data remains until you clear it, the game removes it, or your browser removes it.</li>
+      <li>The analytics retention period depends on the GA4 property configuration.</li>
+      <li>The intended GA4 user-level and event-level retention period is 14 months.</li>
+      <li>Aggregated reports may be retained differently by Google Analytics.</li>
+    </ul>
+    <p class="muted">Withdrawing consent stops future collection but does not automatically
+      erase analytics data that has already been aggregated.</p>
+
+    <h3>International processing</h3>
+    <p>Google and GitHub may process information in countries other than your own, subject to
+      their respective terms and safeguards.</p>
+
+    <h3>Children</h3>
+    <p>Sargamle is a general-audience music game and is not designed to collect personal
+      details from children. It does not require an account or ask players to submit
+      identifying information. Parents or guardians may disable optional analytics through
+      Privacy settings.</p>
+
+    <h3>Your choices and requests</h3>
+    <ul>
+      <li>Reject or withdraw analytics consent from <b>Privacy settings</b>.</li>
+      <li>Delete local game information using <b>Clear local game data</b>.</li>
+      <li>Clear cookies through your browser.</li>
+      <li>Contact the operator using the privacy email above.</li>
+    </ul>
+    <p>Because Sargamle has no accounts and does not ask for identifying information, it may
+      not always be possible to connect pseudonymous analytics records to a particular person.</p>
+
+    <h3>Changes to this notice</h3>
+    <p>This notice may change. The effective date and consent version will be updated when
+      analytics practices change materially.</p>
+
+    <h3>Contact</h3>
+    <p><b><span data-cfg="siteOperator"></span></b> &mdash; <span data-cfg-email></span></p>
+  </div>
+</dialog>
+
+<!-- ============================================================ terms of use -->
+<dialog class="sg" id="dlg-terms" aria-labelledby="dlg-terms-title">
+  <div class="dlg-head">
+    <h2 id="dlg-terms-title">Terms of Use</h2>
+    <button class="dlg-close" data-close aria-label="Close">&times;</button>
+  </div>
+  <div class="dlg-body">
+    <p class="muted">Effective date: <span data-cfg="effectiveDate"></span>.</p>
+
+    <h3>About Sargamle</h3>
+    <p>Sargamle is a free browser-based listening and ear-training game that uses Indian
+      solfège (sargam) concepts.</p>
+
+    <h3>Educational and entertainment purpose</h3>
+    <p>The game is for entertainment and informal ear practice. In particular:</p>
+    <ul>
+      <li>It is not a substitute for instruction from a qualified music teacher.</li>
+      <li>Simplified raga modes may not represent every phrase, ornament, intonation or
+        tradition of a raga.</li>
+      <li>Musical descriptions and generated tunes may contain simplifications or mistakes.</li>
+    </ul>
+
+    <h3>No affiliation</h3>
+    <p>Sargamle is an independent project. It is not affiliated with or endorsed by Wordle,
+      The New York Times, Google, GitHub, or any music school, gharana or cultural
+      institution. These names are mentioned only to clarify that there is no affiliation.</p>
+
+    <h3>Acceptable use</h3>
+    <p>You may use the game for normal personal and educational purposes. You must not:</p>
+    <ul>
+      <li>Interfere with or attempt to disrupt the website.</li>
+      <li>Use automated requests in a way that materially harms availability.</li>
+      <li>Misrepresent yourself as the operator or an official representative of Sargamle.</li>
+      <li>Use the site for unlawful activity.</li>
+    </ul>
+    <p>Ordinary inspection, learning from, and sharing of this public static website are fine.</p>
+
+    <h3>Intellectual property and source code</h3>
+    <p>Source-code licensing: <b><span data-cfg="sourceCodeLicense"></span></b>. Third-party
+      names and trademarks belong to their respective owners.</p>
+
+    <h3>Availability and changes</h3>
+    <ul>
+      <li>The game may change, experience errors or become unavailable.</li>
+      <li>Features, ragas, daily puzzles and analytics may be modified or removed.</li>
+      <li>There is no guarantee that saved browser progress will always remain compatible
+        with future versions.</li>
+    </ul>
+
+    <h3>Disclaimer</h3>
+    <p>The game is provided on an &ldquo;as available&rdquo; basis to the extent permitted by
+      applicable law. Nothing here attempts to waive legal rights that cannot lawfully be waived.</p>
+
+    <h3>Limitation of liability</h3>
+    <p>This is a free hobby project. To the extent permitted by law, the operator is not
+      responsible for indirect loss arising from reliance on, or inability to access, the game.</p>
+
+    <h3>External services and links</h3>
+    <p>Third-party services and links referenced here have their own terms and privacy practices.</p>
+
+    <h3>Governing law</h3>
+    <p>These terms are governed by the law of <b><span data-cfg="governingLaw"></span></b>.</p>
+
+    <h3>Changes to the terms</h3>
+    <p>The effective date will be updated when the terms materially change.</p>
+
+    <h3>Contact</h3>
+    <p><b><span data-cfg="siteOperator"></span></b> &mdash; <span data-cfg-email></span></p>
+  </div>
+</dialog>
+
+<!-- ============================================================ privacy settings -->
+<dialog class="sg" id="dlg-psettings" aria-labelledby="dlg-psettings-title">
+  <div class="dlg-head">
+    <h2 id="dlg-psettings-title">Privacy settings</h2>
+    <button class="dlg-close" data-close aria-label="Close">&times;</button>
+  </div>
+  <div class="dlg-body">
+    <p class="cstatus">Analytics is currently: <b id="pset-status">off</b>.</p>
+    <p class="muted">Analytics is optional. Turning it off does not affect the game.
+      See the <button class="flink" id="pset-privacy-link" style="font-size:inherit">Privacy notice</button>
+      for what is collected.</p>
+
+    <div class="dlg-actions">
+      <button class="primary" id="pset-allow">Allow analytics</button>
+      <button id="pset-disable">Disable analytics</button>
+      <button id="pset-cancel" data-close>Cancel</button>
+    </div>
+
+    <h3 style="margin-top:22px">Clear local game data</h3>
+    <p>This removes Sargamle's game progress and preferences stored in this browser
+      (daily progress, guesses, selected raga). It cannot be undone.</p>
+    <label style="display:flex;gap:8px;align-items:center;margin:8px 0">
+      <input type="checkbox" id="pset-clear-consent"> Also clear my saved analytics choice
+    </label>
+    <div class="dlg-actions">
+      <button class="danger" id="pset-clear">Clear local game data</button>
+    </div>
+  </div>
+</dialog>
 
 <script>
 "use strict";
@@ -310,6 +676,119 @@ function tuneFor(seed,raga){
                       : makeTune(seed,raga);
 }
 
+// ================================================================ PRIVACY / ANALYTICS
+// Opt-in analytics: gtag.js is NEVER loaded, and no event/page_view/ping is sent,
+// until the visitor accepts. All gameplay works with analytics off. See docs F2.
+const CFG=window.PRIVACY_CONFIG;
+const CONSENT_KEY="sargamle_privacy_consent";
+// Explicit allow-list of Sargamle-owned localStorage keys (never localStorage.clear()).
+const SG_GAME_KEYS=["sg-raga","sg-day"];               // gameplay + preferences
+const SG_CONSENT_KEYS=[CONSENT_KEY,"sargamle_force_consent_banner"];
+
+// Dev environments: analytics fully disabled, banner not shown (unless force-flagged).
+const IS_DEV = location.protocol==="file:" ||
+               location.hostname==="localhost" ||
+               location.hostname==="127.0.0.1";
+const DEBUG = (()=>{try{return localStorage.getItem("sargamle_analytics_debug")==="true";}catch{return false;}})();
+const FORCE_BANNER = (()=>{try{return localStorage.getItem("sargamle_force_consent_banner")==="true";}catch{return false;}})();
+
+// Warn (dev only) if config placeholders were never replaced. Never breaks gameplay.
+function warnPlaceholders(){
+  const missing=Object.entries(CFG)
+    .filter(([,v])=>typeof v==="string"&&(v.includes("XXXX")||/^\[.*\]$/.test(v)))
+    .map(([k])=>k);
+  if(missing.length) console.warn("[Sargamle] PRIVACY_CONFIG placeholders not yet replaced:",missing.join(", "));
+}
+warnPlaceholders();
+
+// ---- consent storage ----
+function readConsent(){
+  const c=load(CONSENT_KEY,null);
+  if(!c||typeof c!=="object") return null;
+  if(c.status!=="granted"&&c.status!=="denied") return null;      // malformed
+  if(c.version!==CFG.consentVersion) return null;                 // version bump -> re-ask
+  const ageMs=Date.now()-(Number(c.timestamp)||0);
+  if(ageMs>CFG.consentMaxAgeDays*86400000) return null;           // expired -> re-ask
+  return c;
+}
+function writeConsent(status){
+  store(CONSENT_KEY,{status,version:CFG.consentVersion,timestamp:Date.now()});
+}
+function consentGranted(){ const c=readConsent(); return !!c&&c.status==="granted"; }
+// Single gate every analytics send passes through.
+function analyticsAllowed(){ return !IS_DEV && !gaKilled && consentGranted(); }
+
+// ---- GA4 loader (runs at most once) ----
+let gaLoaded=false, gaKilled=false;
+function loadGA(){
+  if(gaLoaded||IS_DEV) return;
+  gaLoaded=true;
+  gtag('consent','update',{
+    analytics_storage:'granted', ad_storage:'denied',
+    ad_user_data:'denied', ad_personalization:'denied'
+  });
+  const s=document.createElement("script");
+  s.async=true;
+  s.src="https://www.googletagmanager.com/gtag/js?id="+encodeURIComponent(CFG.gaMeasurementId);
+  document.head.appendChild(s);
+  gtag('js',new Date());
+  gtag('config',CFG.gaMeasurementId,{
+    send_page_view:true,                 // GA sends the single page_view on config
+    allow_google_signals:false,
+    allow_ad_personalization_signals:false
+  });
+  if(DEBUG) console.debug("[Sargamle Analytics]","loaded gtag.js + config",CFG.gaMeasurementId);
+}
+
+// ---- reusable event helper ----
+// Common params drawn from live game state (no duplicate state kept).
+function ragaKey(){ return (raga&&raga.name==="Bhupali")?"bhupali":"shuddha_saptak"; }
+function commonParams(){
+  return { game_name:"sargamle", raga:ragaKey(),
+           game_mode: daily?"daily":"practice", puzzle_number: daily?(today+1):0 };
+}
+function trackSargamleEvent(eventName,parameters={}){
+  try{
+    const params={...commonParams(),...parameters};
+    if(DEBUG){ params.debug_mode=true; console.debug("[Sargamle Analytics]",eventName,params); }
+    if(!analyticsAllowed()) return;      // silent no-op until consent granted
+    if(typeof window.gtag!=="function") return;
+    window.gtag('event',eventName,params);
+  }catch(e){ /* analytics must never break gameplay */ }
+}
+
+// ---- per-puzzle analytics state (reset only on a genuinely new puzzle) ----
+let analyticsGameStarted=false, analyticsGameCompleted=false, analyticsReplayCount=0;
+function resetPuzzleAnalytics(){
+  analyticsGameStarted=false; analyticsGameCompleted=false; analyticsReplayCount=0;
+}
+// game_start: first meaningful interaction with a puzzle (play/replay or pad/key press).
+function markGameStart(){
+  if(analyticsGameStarted) return;
+  analyticsGameStarted=true;
+  trackSargamleEvent("game_start",{});   // common params carry raga/mode/puzzle_number
+}
+
+// ---- withdraw / kill switch ----
+function killAnalytics(){
+  gaKilled=true;
+  try{ window["ga-disable-"+CFG.gaMeasurementId]=true; }catch{}
+  gtag('consent','update',{
+    analytics_storage:'denied', ad_storage:'denied',
+    ad_user_data:'denied', ad_personalization:'denied'
+  });
+  // Delete JS-accessible first-party GA cookies (_ga and _ga_*).
+  try{
+    document.cookie.split(";").map(c=>c.split("=")[0].trim())
+      .filter(n=>n==="_ga"||n.startsWith("_ga_"))
+      .forEach(n=>{
+        const base=n+"=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+        document.cookie=base;
+        document.cookie=base+"; domain=."+location.hostname;
+      });
+  }catch{}
+}
+
 let ragaIdx=load("sg-raga",0), daily=true;
 let raga, target, guesses, cur, done;
 
@@ -371,7 +850,16 @@ function playSeq(seq,{tiles=null,pads=true}={}){
   function clearGlowStep(){document.querySelectorAll(".glow,.lit")
     .forEach(e=>e.classList.remove("glow","lit"));}
 }
-document.getElementById("hear").addEventListener("click",()=>playSeq(target,{pads:false}));
+// Explicit player-triggered replay of the hidden tune (button or spacebar).
+// Counts as game_start (first time) and a melody_replay. The automatic post-loss
+// playback inside finish() deliberately does NOT go through here.
+function playHiddenTune(){
+  markGameStart();
+  analyticsReplayCount++;
+  trackSargamleEvent("melody_replay",{replay_count:analyticsReplayCount});
+  playSeq(target,{pads:false});
+}
+document.getElementById("hear").addEventListener("click",playHiddenTune);
 
 // ---------------------------------------------------------------- board+pads
 const board=document.getElementById("board"), padbox=document.getElementById("pads");
@@ -428,6 +916,7 @@ function toast(msg,ms=1800){
 }
 function press(s){
   if(done) return;
+  markGameStart();                       // first pad/key press = game start
   pluck(s,ac().currentTime); startDrone();
   const p=document.getElementById("pad-"+s);
   p.classList.add("lit"); setTimeout(()=>p.classList.remove("lit"),180);
@@ -454,7 +943,22 @@ function submit(){
   const row=board.children[guesses.length-1];
   playSeq(g,{tiles:[...row.children]});
   const won=g.every((s,i)=>s===target[i]);
-  if(won||guesses.length===TRIES){done=true;setTimeout(()=>finish(won),LEN*STEP*1000+400);}
+  markGameStart();                       // submitting is meaningful interaction
+  // one guess_submit per valid submitted guess (no swaras/answer sent)
+  trackSargamleEvent("guess_submit",{attempt_number:guesses.length,is_correct:won});
+  if(won||guesses.length===TRIES){
+    done=true;
+    // game_complete fires here (current-session completion) exactly once —
+    // NOT from finish(), which also runs when restoring a saved daily.
+    if(!analyticsGameCompleted){
+      analyticsGameCompleted=true;
+      trackSargamleEvent("game_complete",{
+        result:won?"won":"lost", won:won,
+        attempts_used:guesses.length, replay_count:analyticsReplayCount
+      });
+    }
+    setTimeout(()=>finish(won),LEN*STEP*1000+400);
+  }
   saveDaily();
 }
 function finish(won){
@@ -491,12 +995,20 @@ document.getElementById("sharebtn").addEventListener("click",()=>{
     "https://kmcodes.github.io/AIFun/sargamle.html",
   ].join("\n");
   navigator.clipboard.writeText(text)
-    .then(()=>toast("Copied to clipboard")).catch(()=>toast("Couldn't copy"));
+    .then(()=>{
+      toast("Copied to clipboard");
+      // share fires only after the copy succeeds
+      trackSargamleEvent("share",{
+        method:"clipboard", result:won?"won":"lost", attempts_used:guesses.length
+      });
+    })
+    .catch(()=>toast("Couldn't copy"));
 });
 
 function newGame(isDaily){
   daily=isDaily; raga=RAGAS[ragaIdx];
   cur=[]; guesses=[]; done=false; clearGlow();
+  resetPuzzleAnalytics();                // genuinely new playable puzzle loaded
   document.getElementById("done").classList.remove("show");
   document.getElementById("ragabtn").textContent=raga.label||raga.name;
   document.getElementById("puzzno").textContent=daily?`#${today+1}`:"practice";
@@ -515,9 +1027,16 @@ function finishRestored(){
   finish(won);
 }
 document.getElementById("ragabtn").addEventListener("click",()=>{
+  const prev=ragaKey();
   ragaIdx=(ragaIdx+1)%RAGAS.length; store("sg-raga",ragaIdx); newGame(daily);
+  // raga_change: user switched scale (not fired during initial restore/setup)
+  trackSargamleEvent("raga_change",{previous_raga:prev,selected_raga:ragaKey()});
 });
-document.getElementById("againbtn").addEventListener("click",()=>newGame(false));
+document.getElementById("againbtn").addEventListener("click",()=>{
+  newGame(false);
+  // practice_start: user explicitly started a new practice puzzle
+  trackSargamleEvent("practice_start",{raga:ragaKey()});
+});
 
 addEventListener("keydown",e=>{
   if(e.ctrlKey||e.metaKey||e.altKey) return;
@@ -525,8 +1044,116 @@ addEventListener("keydown",e=>{
   if(i>=1&&i<=raga.swaras.length) press(raga.swaras[i-1]);
   else if(e.key==="Enter") submit();
   else if(e.key==="Backspace"){if(!done){cur.pop();paint();}}
-  else if(e.key===" "){e.preventDefault();playSeq(target,{pads:false});}
+  else if(e.key===" "){e.preventDefault();playHiddenTune();}
 });
+
+// ================================================================ PRIVACY UI
+(function privacyUI(){
+  const $=id=>document.getElementById(id);
+  // Fill config-driven text spans (single source of truth = PRIVACY_CONFIG).
+  document.querySelectorAll("[data-cfg]").forEach(el=>{ el.textContent=CFG[el.dataset.cfg]; });
+  // Email: real mailto only once the placeholder is replaced with a valid address.
+  const emailValid=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(CFG.privacyEmail);
+  document.querySelectorAll("[data-cfg-email]").forEach(el=>{
+    if(emailValid){ const a=document.createElement("a");
+      a.href="mailto:"+CFG.privacyEmail; a.textContent=CFG.privacyEmail; el.replaceWith(a); }
+    else el.textContent=CFG.privacyEmail;   // plain text — no broken mailto:
+  });
+  // Visible placeholder warnings inside the docs if key values weren't replaced.
+  if(/^\[.*\]$/.test(CFG.governingLaw))
+    console.warn("[Sargamle] governingLaw placeholder not replaced — review Terms before launch.");
+
+  // ---- dialog open/close with focus restore + hash sync ----
+  const dPrivacy=$("dlg-privacy"), dTerms=$("dlg-terms"), dPset=$("dlg-psettings");
+  let opener=null;
+  function openDlg(dlg,hash){
+    opener=document.activeElement;
+    if(hash&&location.hash!==hash) history.pushState(null,"",hash);
+    if(typeof dlg.showModal==="function") dlg.showModal();
+    else dlg.setAttribute("open","");     // fallback if <dialog> unsupported
+    const h=dlg.querySelector(".dlg-close"); if(h) h.focus();
+  }
+  function closeDlg(dlg){
+    if(dlg.open){ if(typeof dlg.close==="function") dlg.close(); else dlg.removeAttribute("open"); }
+    // if a hash opened it, drop the hash via Back so browser history stays sane
+    if(location.hash==="#privacy"||location.hash==="#terms"){
+      if(history.length>1) history.back(); else history.replaceState(null,"",location.pathname+location.search);
+    }
+    if(opener&&opener.focus) opener.focus();
+    opener=null;
+  }
+  document.querySelectorAll("dialog.sg [data-close]").forEach(b=>
+    b.addEventListener("click",()=>closeDlg(b.closest("dialog"))));
+  // native dialog Escape / backdrop -> our close path (for focus + hash cleanup)
+  [dPrivacy,dTerms,dPset].forEach(d=>d.addEventListener("close",()=>{
+    if((location.hash==="#privacy"||location.hash==="#terms")){
+      history.replaceState(null,"",location.pathname+location.search);
+    }
+    if(opener&&opener.focus){opener.focus();opener=null;}
+  }));
+
+  $("lnk-privacy").addEventListener("click",()=>openDlg(dPrivacy,"#privacy"));
+  $("lnk-terms").addEventListener("click",()=>openDlg(dTerms,"#terms"));
+  $("lnk-psettings").addEventListener("click",()=>{ refreshPset(); openDlg(dPset); });
+  $("c-more").addEventListener("click",()=>openDlg(dPrivacy,"#privacy"));
+  $("pset-privacy-link").addEventListener("click",()=>{ closeDlg(dPset); openDlg(dPrivacy,"#privacy"); });
+
+  // Hash routing: #privacy / #terms open the matching doc directly.
+  function syncHash(){
+    if(location.hash==="#privacy"&&!dPrivacy.open){ opener=$("lnk-privacy"); dPrivacy.showModal?.(); }
+    else if(location.hash==="#terms"&&!dTerms.open){ opener=$("lnk-terms"); dTerms.showModal?.(); }
+  }
+  addEventListener("hashchange",syncHash);
+
+  // ---- consent banner ----
+  const banner=$("consent");
+  function showBanner(){ banner.classList.add("show"); }
+  function hideBanner(){ banner.classList.remove("show"); }
+  $("c-accept").addEventListener("click",()=>{ writeConsent("granted"); loadGA(); hideBanner(); refreshPset(); });
+  $("c-reject").addEventListener("click",()=>{ writeConsent("denied"); hideBanner(); refreshPset(); });
+
+  // ---- privacy settings ----
+  function refreshPset(){
+    $("pset-status").textContent = consentGranted() ? "on" : "off";
+  }
+  $("pset-allow").addEventListener("click",()=>{
+    writeConsent("granted"); gaKilled=false;
+    try{ window["ga-disable-"+CFG.gaMeasurementId]=false; }catch{}
+    loadGA(); refreshPset(); hideBanner();
+  });
+  $("pset-disable").addEventListener("click",()=>{
+    const was=consentGranted();
+    writeConsent("denied");
+    killAnalytics();                       // stop future events + clear _ga cookies
+    refreshPset(); hideBanner();
+    // If GA was already live this session, a reload guarantees it's fully gone.
+    if(was&&gaLoaded){ setTimeout(()=>location.reload(),150); }
+  });
+  $("pset-clear").addEventListener("click",()=>{
+    if(!confirm("Remove Sargamle's saved game progress and preferences from this browser? This cannot be undone.")) return;
+    SG_GAME_KEYS.forEach(k=>{ try{localStorage.removeItem(k);}catch{} });
+    if($("pset-clear-consent").checked)
+      SG_CONSENT_KEYS.forEach(k=>{ try{localStorage.removeItem(k);}catch{} });
+    // Reset to a safe fresh state.
+    ragaIdx=0; newGame(true);
+    toast("Local game data cleared");
+    closeDlg(dPset);
+    maybeShowBanner();
+  });
+
+  // ---- decide whether to show the banner on load ----
+  function maybeShowBanner(){
+    if(IS_DEV && !FORCE_BANNER) return;    // never in dev unless forced
+    if(FORCE_BANNER){ showBanner(); return; }
+    if(readConsent()===null) showBanner(); // no valid decision -> ask (non-blocking)
+  }
+
+  // Returning accepted visitors: auto-load analytics (page_view). Rejected: stay off.
+  if(!IS_DEV && consentGranted()) loadGA();
+  refreshPset();
+  maybeShowBanner();
+  syncHash();
+})();
 
 setDrone(true);
 newGame(true);
