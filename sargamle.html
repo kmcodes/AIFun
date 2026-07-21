@@ -477,9 +477,20 @@ document.getElementById("sharebtn").addEventListener("click",()=>{
   const EM={good:"\u{1F7E9}",near:"\u{1F7E8}",absent:"⬜"};
   const grid=guesses.map(g=>score(g,target).map(r=>EM[r]).join("")).join("\n");
   const won=guesses.length&&guesses[guesses.length-1].every((s,i)=>s===target[i]);
-  const head=`Sargamle #${today+1} (${raga.name}) ${won?guesses.length:"X"}/6`;
-  const url="https://kmcodes.github.io/AIFun/sargamle.html";
-  navigator.clipboard.writeText(head+"\n\n"+grid+"\n\n"+url)
+  const scoreLine=`Sargamle #${today+1} (${raga.name}) — ${won?guesses.length:"X"}/6`;
+  const text=[
+    "Think you can identify a tune by ear? \u{1F3B5}",
+    "",
+    scoreLine,
+    "",
+    grid,
+    "",
+    "Wordle for the ears: listen to a 5-swara tune and play it back.",
+    "",
+    "Try today's puzzle and share your score:",
+    "https://kmcodes.github.io/AIFun/sargamle.html",
+  ].join("\n");
+  navigator.clipboard.writeText(text)
     .then(()=>toast("Copied to clipboard")).catch(()=>toast("Couldn't copy"));
 });
 
