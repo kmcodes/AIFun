@@ -147,13 +147,17 @@ Do not alter existing gameplay, random generation, daily seed, scoring, keyboard
 **Status:** todo (record-only; not yet implemented)
 **Depends on:** F1. **Supersedes** F1's auto-load-on-every-page-load model.
 
+### Goal (read first)
+
+**This feature exists to reduce the operator's personal privacy/legal exposure for the publicly deployed app** at `https://kmcodes.github.io/AIFun/sargamle.html` — i.e. protect the person running the site, not to license or document the source code. The protective value comes from: (a) analytics being genuinely **opt-in** (no tracking or GA cookies until the visitor accepts), (b) an honest, plain-language **Privacy Notice** disclosing exactly what GA4 may collect and what is never sent, (c) **Terms of Use** with sensible disclaimers/liability wording for a free hobby project, and (d) easy **withdrawal + local-data clearing**. Source-code linking/licensing is *not* the point of F2 and is a minor, optional footer nicety only (see Open questions) — deprioritise it.
+
 ### Summary
 
 Add a privacy-first, opt-in analytics consent model plus a Privacy Notice, Terms of Use, a persistent **Privacy settings** control, and a **Clear local game data** control — all inside the single static `sargamle.html`. No backend, framework, package, build step, new files, extra CSS framework / icon library / font. Text is plain-language and practical — **not** a claim of GDPR/DPDP/legal compliance.
 
 ### Motivation
 
-The site uses GA4 (F1) for basic usage analytics only — no accounts, payments, ads, server DB, profiles, or user content. Give visitors genuine, easy, non-dark-pattern control over analytics while keeping the whole game fully playable without it.
+Primary: **limit the operator's privacy/legal risk** from running a public analytics-enabled site (see Goal). Anyone can open the deployed page, so it needs a defensible, honest privacy posture: consent before tracking, truthful disclosure, and a clear liability disclaimer. Secondary: give visitors genuine, easy, non-dark-pattern control over analytics while keeping the whole game fully playable without it. The site uses GA4 (F1) for basic usage analytics only — no accounts, payments, ads, server DB, profiles, or user content.
 
 ### Behaviour
 
@@ -272,6 +276,6 @@ Real gameplay keys today: **`sg-raga`** (selected raga index) and **`sg-day`** (
 
 ### Open questions
 
-- **Source-code link / repo URL.** No `github.com/...` literal exists in `sargamle.html` and there is **no LICENSE file** in the repo root. The repo is confidently derivable from the OG URLs (`https://kmcodes.github.io/AIFun/...`) → `https://github.com/kmcodes/AIFun`. Decision needed at implementation: include the **Source code** footer link to that repo (recommended, it's public), and set `sourceCodeLicense` — currently there is no licence, so it defaults to a visible "All rights reserved / owner review" placeholder unless the owner adds a LICENSE.
+- **Source-code link / repo URL (low priority — not the point of F2).** Since F2 is about protecting the operator of the *deployed app*, source-code linking/licensing is optional. Default: **omit the "Source code" footer link** and keep `sourceCodeLicense` as a neutral "All rights reserved" placeholder unless the owner explicitly wants the repo advertised. (For reference: no `github.com/...` literal exists in `sargamle.html`, there is **no LICENSE file**, and the repo is derivable from OG URLs as `https://github.com/kmcodes/AIFun`.)
 - **Placeholders requiring the owner before public launch:** `siteOperator`, `privacyEmail`, `effectiveDate`, `governingLaw`, `sourceCodeLicense`, and the real `gaMeasurementId` (shared with F1). `mailto:` must stay non-linked until `privacyEmail` is a valid address.
 - **Legal review.** Privacy Notice + Terms are plain-language, not a compliance guarantee; flag for owner/lawyer review before public launch (esp. governing law, liability, retention wording).
