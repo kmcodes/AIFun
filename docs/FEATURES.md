@@ -136,5 +136,5 @@ Do not alter existing gameplay, random generation, daily seed, scoring, keyboard
 ### Open questions
 
 - **Raga naming (resolved).** The original spec said `'bhupali' | 'bilawal'`, but the second raga was renamed in the UI to **"Shuddha Saptak"** (internal `RAGAS[1].name === "Shuddha Saptak"`). GA4 `raga` values are **`'bhupali' | 'shuddha_saptak'`**. Map from `raga.name` at implementation time (e.g. lowercase + underscore the name, or a small lookup) rather than hardcoding by index.
-- **`game_start` on the auto-played daily tune.** Confirm whether the page auto-plays anything on load. If the tune only plays on explicit "HEAR THE TUNE" / spacebar / pad press, no special-casing is needed; the "don't count initial automatic playback" clause is a safeguard.
+- **`game_start` / auto-play (resolved).** The page does **not** auto-play any tune on load — the tune plays only on explicit "HEAR THE TUNE" / spacebar / pad press. So no special-casing is needed: the first explicit play, replay, or pad/key press is a genuine `game_start`, and the spec's "don't count initial automatic playback as a replay" clause is just a safeguard (currently a no-op).
 - Existing state to reuse (verify at implementation time): `ragaIdx`, `raga`, `daily`, `guesses`, `done`, `today`, and `newGame()` as the puzzle-load reset point.
