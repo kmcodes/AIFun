@@ -478,7 +478,8 @@ document.getElementById("sharebtn").addEventListener("click",()=>{
   const grid=guesses.map(g=>score(g,target).map(r=>EM[r]).join("")).join("\n");
   const won=guesses.length&&guesses[guesses.length-1].every((s,i)=>s===target[i]);
   const head=`Sargamle #${today+1} (${raga.name}) ${won?guesses.length:"X"}/6`;
-  navigator.clipboard.writeText(head+"\n\n"+grid)
+  const url="https://kmcodes.github.io/AIFun/sargamle.html";
+  navigator.clipboard.writeText(head+"\n\n"+grid+"\n\n"+url)
     .then(()=>toast("Copied to clipboard")).catch(()=>toast("Couldn't copy"));
 });
 
